@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slider</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            screens: {
+              s: "650px",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      .touch-scroll {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: scroll;
+        scroll-padding: 0 2.4rem;
+        scroll-snap-type: x mandatory;
+      }
+
+      .touch-scroll .carousel-slide {
+        scroll-snap-align: start;
+      }
+
+      .touch-scroll::-webkit-scrollbar {
+        display: none;
+      }
+
+      .site-max {
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        width: 100%;
+      }
+
+      .site-grid {
+        display: grid;
+        grid-column-gap: 1.7rem;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+      }
+
+      .h3 {
+        font-size: 3.7rem;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+
+      .rounded-default {
+        border-radius: 1.2rem;
+      }
+
+      .radius-fix {
+        -webkit-mask-image: -webkit-radial-gradient(#fff, #000);
+      }
+      .bg-gray {
+        --tw-bg-opacity: 1;
+        background-color: #f5f5f5;
+        background-color: rgba(245, 245, 245, var(--tw-bg-opacity));
+      }
+
+      .item__fig {
+        transition: transform 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+      }
+
+      .item:hover .item__fig[data-v-d87a7eae] {
+        transform: scale(1.05);
+      }
+
+      .lazy {
+        --d: 0s;
+      }
+
+      .lazy img.is-loaded {
+        opacity: 1;
+        transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition-delay: var(--d);
+      }
+      .lazy img {
+        opacity: 0;
+      }
+      .media-fill img,
+      .media-fill video {
+        height: 100%;
+        left: 0;
+        -o-object-fit: cover;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        width: 100%;
+      }
+
+      .icon-circle {
+        -webkit-clip-path: circle(0 at 50%);
+        clip-path: circle(0 at 50%);
+        transition: -webkit-clip-path 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+        transition: clip-path 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+        transition: clip-path 0.75s cubic-bezier(0.19, 1, 0.22, 1),
+          -webkit-clip-path 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+        transition: clip-path 0.75s cubic-bezier(0.19, 1, 0.22, 1),
+          -webkit-clip-path 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+      }
+
+      .icon-circle__icon {
+        transform: translateX(-200%);
+        transition: transform 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+        color: #000;
+      }
+
+      .icon-circle-trig:hover .icon-circle,
+      a:hover .icon-circle {
+        -webkit-clip-path: circle(50% at 50%);
+        clip-path: circle(50% at 50%);
+      }
+      .icon-circle-trig:hover .icon-circle__icon,
+      a:hover .icon-circle__icon {
+        transform: translateX(0);
+      }
+
+      .bg-yellow {
+        --tw-bg-opacity: 1;
+        background-color: #fff555;
+        background-color: rgba(255, 245, 85, var(--tw-bg-opacity));
+      }
+
+      .bg-gray-3 {
+        --tw-bg-opacity: 1;
+        background-color: #dfe6ea;
+        background-color: rgba(223, 230, 234, var(--tw-bg-opacity));
+      }
+
+      .p2 {
+        font-size: max(12px, min(20px, 2rem));
+      }
+
+      .carousel-btn__icon.--first {
+        transition-delay: 0.2s;
+      }
+      .carousel-btn__icon {
+        transition: transform 0.65s cubic-bezier(0.19, 1, 0.22, 1);
+        font-size: 13px;
+      }
+
+      .carousel-btn__icon.--last {
+        transform: translateX(100%);
+        transition-delay: 0s;
+      }
+
+      .carousel-btn.previous:hover .carousel-btn__icon.--first {
+        transform: translateX(-100%);
+        transition-delay: 0s;
+      }
+
+      .carousel-btn:hover .carousel-btn__icon.--last {
+        transform: translateX(0);
+        transition-delay: 0.2s;
+      }
+
+      .next .carousel-btn__icon.--last {
+        transform: translateX(-100%);
+      }
+
+      .carousel-btn__icon.--last {
+        transform: translateX(100%);
+        transition-delay: 0s;
+      }
+
+      .carousel-btn.next:hover .carousel-btn__icon.--first {
+        transform: translateX(100%);
+        transition-delay: 0s;
+      }
+
+      .text-gray-5 {
+        --tw-text-opacity: 1;
+        color: #9a9a9a;
+        color: rgba(154, 154, 154, var(--tw-text-opacity));
+      }
+    </style>
+  </head>
+  <body>
+    <div class="relative overflow-hidden">
+      <div data-products="true" class="mb-[150px] s:mb-200" data-v-67f0ba94="">
+        <div class="relative overflow-hidden" data-v-67f0ba94="">
+          <div class="site-max" data-v-67f0ba94="">
+            <div
+              class="site-grid items-start mb-[50px] s:mb-[100px]"
+              data-v-67f0ba94=""
+            >
+              <h2
+                class="h3 col-start-6 col-span-7 mt-[30px] s:-mt-[10px]"
+                data-v-67f0ba94=""
+              >
+                We offer a range of charge points to choose from.
+              </h2>
+            </div>
+            <div
+              class="flex z-[99999] cursor-grab"
+              id="swipeElement"
+              data-v-67f0ba94=""
+            >
+              <article
+                data-product="true"
+                class="item js-slide relative font-medium icon-circle-trig max-w-[29rem] min-w-[29rem] mr-[8px] s:mr-[17px]"
+                data-v-d87a7eae=""
+                data-v-67f0ba94=""
+                style="
+                  transform: translate(-0.11px, 0px);
+                  translate: none;
+                  rotate: none;
+                  scale: none;
+                "
+              >
+                <div
+                  class="pt-[130%] relative overflow-hidden rounded-default radius-fix bg-gray"
+                  data-v-d87a7eae=""
+                >
+                  <div
+                    class="absolute inset-0 flex items-center justify-center"
+                    data-v-d87a7eae=""
+                  >
+                    <div class="relative w-[13.6rem] h-auto" data-v-d87a7eae="">
+                      <figure
+                        class="overflow-hidden item__fig media-fill lazy relative w-full"
+                        data-v-6567415c=""
+                        data-v-d87a7eae=""
+                      >
+                        <div
+                          style="padding-top: 133.46%"
+                          data-v-6567415c=""
+                        ></div>
+                        <!---->
+                        <picture class="absolute inset-0" data-v-6567415c=""
+                          ><source
+                            type="image/webp"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609265-zaptec-go.png?fit=max&amp;fm=webp&amp;h=3000&amp;w=2000
+                            "
+                            data-v-6567415c="" />
+                          <source
+                            type="image/jpg"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609265-zaptec-go.png?fit=max&amp;fm=jpg&amp;h=1920&amp;w=1920
+                            "
+                            data-v-6567415c="" />
+                          <img
+                            src="https://www.datocms-assets.com/105899/1699609265-zaptec-go.png"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            width="526"
+                            height="702"
+                            alt=""
+                            data-v-6567415c=""
+                            class="is-loaded"
+                        /></picture>
+                      </figure>
+                    </div>
+                  </div>
+                  <div
+                    class="icon-circle absolute bottom-[20px] s:bottom-auto s:top-[30px] right-[20px] s:right-[30px] h-[55px] w-[55px] flex items-center justify-center bg-yellow rounded-full z-2"
+                    data-v-d87a7eae=""
+                  >
+                    <div
+                      class="icon-circle__icon text-[16px] pb-[.1em]"
+                      data-v-d87a7eae=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+                <h2 class="mt-[17px]" data-v-d87a7eae="">Zaptec Go</h2>
+                <h3 class="text-gray-5 mt-[5px]" data-v-d87a7eae="">
+                  Up to 7.4kW charging speed
+                </h3>
+              </article>
+              <article
+                data-product="true"
+                class="item relative js-slide font-medium icon-circle-trig max-w-[29rem] min-w-[29rem] mr-[8px] s:mr-[17px]"
+                data-v-d87a7eae=""
+                data-v-67f0ba94=""
+                style="
+                  transform: translate(-0.11px, 0px);
+                  translate: none;
+                  rotate: none;
+                  scale: none;
+                "
+              >
+                <div
+                  class="pt-[130%] relative overflow-hidden rounded-default radius-fix bg-gray"
+                  data-v-d87a7eae=""
+                >
+                  <div
+                    class="absolute inset-0 flex items-center justify-center"
+                    data-v-d87a7eae=""
+                  >
+                    <div class="relative w-[13.6rem] h-auto" data-v-d87a7eae="">
+                      <figure
+                        class="overflow-hidden item__fig media-fill lazy relative w-full"
+                        data-v-6567415c=""
+                        data-v-d87a7eae=""
+                      >
+                        <div
+                          style="padding-top: 133.46%"
+                          data-v-6567415c=""
+                        ></div>
+                        <!---->
+                        <picture class="absolute inset-0" data-v-6567415c=""
+                          ><source
+                            type="image/webp"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609489-eo-mini.png?fit=max&amp;fm=webp&amp;h=3000&amp;w=2000
+                            "
+                            data-v-6567415c="" />
+                          <source
+                            type="image/jpg"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609489-eo-mini.png?fit=max&amp;fm=jpg&amp;h=1920&amp;w=1920
+                            "
+                            data-v-6567415c="" />
+                          <img
+                            src="https://www.datocms-assets.com/105899/1699609489-eo-mini.png"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            width="526"
+                            height="702"
+                            alt=""
+                            data-v-6567415c=""
+                            class="is-loaded"
+                        /></picture>
+                      </figure>
+                    </div>
+                  </div>
+                  <div
+                    class="icon-circle absolute bottom-[20px] s:bottom-auto s:top-[30px] right-[20px] s:right-[30px] h-[55px] w-[55px] flex items-center justify-center bg-yellow rounded-full z-2"
+                    data-v-d87a7eae=""
+                  >
+                    <div
+                      class="icon-circle__icon text-[16px] pb-[.1em]"
+                      data-v-d87a7eae=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+                <h2 class="mt-[17px]" data-v-d87a7eae="">EO Mini Pro 3</h2>
+                <h3 class="text-gray-5 mt-[5px]" data-v-d87a7eae="">
+                  Up to 7.4kW charging speed
+                </h3>
+              </article>
+              <article
+                data-product="true"
+                class="item relative js-slide font-medium icon-circle-trig max-w-[29rem] min-w-[29rem] mr-[8px] s:mr-[17px]"
+                data-v-d87a7eae=""
+                data-v-67f0ba94=""
+                style="
+                  transform: translate(-0.11px, 0px);
+                  translate: none;
+                  rotate: none;
+                  scale: none;
+                "
+              >
+                <div
+                  class="pt-[130%] relative overflow-hidden rounded-default radius-fix bg-gray"
+                  data-v-d87a7eae=""
+                >
+                  <div
+                    class="absolute inset-0 flex items-center justify-center"
+                    data-v-d87a7eae=""
+                  >
+                    <div class="relative w-[13.6rem] h-auto" data-v-d87a7eae="">
+                      <figure
+                        class="overflow-hidden item__fig media-fill lazy relative w-full"
+                        data-v-6567415c=""
+                        data-v-d87a7eae=""
+                      >
+                        <div
+                          style="padding-top: 133.46%"
+                          data-v-6567415c=""
+                        ></div>
+                        <!---->
+                        <picture class="absolute inset-0" data-v-6567415c=""
+                          ><source
+                            type="image/webp"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609145-easee-one.png?fit=max&amp;fm=webp&amp;h=3000&amp;w=2000
+                            "
+                            data-v-6567415c="" />
+                          <source
+                            type="image/jpg"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609145-easee-one.png?fit=max&amp;fm=jpg&amp;h=1920&amp;w=1920
+                            "
+                            data-v-6567415c="" />
+                          <img
+                            src="https://www.datocms-assets.com/105899/1699609145-easee-one.png"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            width="526"
+                            height="702"
+                            alt=""
+                            data-v-6567415c=""
+                            class="is-loaded"
+                        /></picture>
+                      </figure>
+                    </div>
+                  </div>
+                  <div
+                    class="icon-circle absolute bottom-[20px] s:bottom-auto s:top-[30px] right-[20px] s:right-[30px] h-[55px] w-[55px] flex items-center justify-center bg-yellow rounded-full z-2"
+                    data-v-d87a7eae=""
+                  >
+                    <div
+                      class="icon-circle__icon text-[16px] pb-[.1em]"
+                      data-v-d87a7eae=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+                <h2 class="mt-[17px]" data-v-d87a7eae="">Easee One</h2>
+                <h3 class="text-gray-5 mt-[5px]" data-v-d87a7eae="">
+                  Up to 7.4kW charging speed
+                </h3>
+              </article>
+              <article
+                data-product="true"
+                class="item relative js-slide font-medium icon-circle-trig max-w-[29rem] min-w-[29rem] mr-[8px] s:mr-[17px]"
+                data-v-d87a7eae=""
+                data-v-67f0ba94=""
+                style="
+                  transform: translate(-0.11px, 0px);
+                  translate: none;
+                  rotate: none;
+                  scale: none;
+                "
+              >
+                <div
+                  class="pt-[130%] relative overflow-hidden rounded-default radius-fix bg-gray"
+                  data-v-d87a7eae=""
+                >
+                  <div
+                    class="absolute inset-0 flex items-center justify-center"
+                    data-v-d87a7eae=""
+                  >
+                    <div class="relative w-[13.6rem] h-auto" data-v-d87a7eae="">
+                      <figure
+                        class="overflow-hidden item__fig media-fill lazy relative w-full"
+                        data-v-6567415c=""
+                        data-v-d87a7eae=""
+                      >
+                        <div
+                          style="padding-top: 133.46%"
+                          data-v-6567415c=""
+                        ></div>
+                        <!---->
+                        <picture class="absolute inset-0" data-v-6567415c=""
+                          ><source
+                            type="image/webp"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609173-eo-genius.png?fit=max&amp;fm=webp&amp;h=3000&amp;w=2000
+                            "
+                            data-v-6567415c="" />
+                          <source
+                            type="image/jpg"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609173-eo-genius.png?fit=max&amp;fm=jpg&amp;h=1920&amp;w=1920
+                            "
+                            data-v-6567415c="" />
+                          <img
+                            src="https://www.datocms-assets.com/105899/1699609173-eo-genius.png"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            width="526"
+                            height="702"
+                            alt=""
+                            data-v-6567415c=""
+                            class="is-loaded"
+                        /></picture>
+                      </figure>
+                    </div>
+                  </div>
+                  <div
+                    class="icon-circle absolute bottom-[16px] s:bottom-auto s:top-[30px] right-[20px] s:right-[30px] h-[55px] w-[55px] flex items-center justify-center bg-yellow rounded-full z-2"
+                    data-v-d87a7eae=""
+                  >
+                    <div
+                      class="icon-circle__icon text-[20px] pb-[.1em]"
+                      data-v-d87a7eae=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+                <h2 class="mt-[17px]" data-v-d87a7eae="">EO Genius 2</h2>
+                <h3 class="text-gray-5 mt-[5px]" data-v-d87a7eae="">
+                  7.2kW and 22kW variants
+                </h3>
+              </article>
+              <article
+                data-product="true"
+                class="item relative js-slide font-medium icon-circle-trig max-w-[29rem] min-w-[29rem] mr-[8px] s:mr-[17px]"
+                data-v-d87a7eae=""
+                data-v-67f0ba94=""
+                style="
+                  transform: translate(-411.24px, 0px);
+                  translate: none;
+                  rotate: none;
+                  scale: none;
+                "
+              >
+                <div
+                  class="pt-[130%] relative overflow-hidden rounded-default radius-fix bg-gray"
+                  data-v-d87a7eae=""
+                >
+                  <div
+                    class="absolute inset-0 flex items-center justify-center"
+                    data-v-d87a7eae=""
+                  >
+                    <div class="relative w-[13.6rem] h-auto" data-v-d87a7eae="">
+                      <figure
+                        class="overflow-hidden item__fig media-fill lazy relative w-full"
+                        data-v-6567415c=""
+                        data-v-d87a7eae=""
+                      >
+                        <div
+                          style="padding-top: 133.46%"
+                          data-v-6567415c=""
+                        ></div>
+                        <!---->
+                        <picture class="absolute inset-0" data-v-6567415c=""
+                          ><source
+                            type="image/webp"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609381-zaptec-pro.png?fit=max&amp;fm=webp&amp;h=3000&amp;w=2000
+                            "
+                            data-v-6567415c="" />
+                          <source
+                            type="image/jpg"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609381-zaptec-pro.png?fit=max&amp;fm=jpg&amp;h=1920&amp;w=1920
+                            "
+                            data-v-6567415c="" />
+                          <img
+                            src="https://www.datocms-assets.com/105899/1699609381-zaptec-pro.png"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            width="526"
+                            height="702"
+                            alt=""
+                            data-v-6567415c=""
+                            class="is-loaded"
+                        /></picture>
+                      </figure>
+                    </div>
+                  </div>
+                  <div
+                    class="icon-circle absolute bottom-[20px] s:bottom-auto s:top-[30px] right-[20px] s:right-[30px] h-[55px] w-[55px] flex items-center justify-center bg-yellow rounded-full z-2"
+                    data-v-d87a7eae=""
+                  >
+                    <div
+                      class="icon-circle__icon text-[16px] pb-[.1em]"
+                      data-v-d87a7eae=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+                <h2 class="mt-[17px]" data-v-d87a7eae="">Zaptec Pro</h2>
+                <h3 class="text-gray-5 mt-[5px]" data-v-d87a7eae="">
+                  Up to 22kW charging speed
+                </h3>
+              </article>
+              <article
+                data-product="true"
+                class="item relative js-slide font-medium icon-circle-trig max-w-[29rem] min-w-[29rem] mr-[8px] s:mr-[17px]"
+                data-v-d87a7eae=""
+                data-v-67f0ba94=""
+                style="
+                  transform: translate(-871.51px, 0px);
+                  translate: none;
+                  rotate: none;
+                  scale: none;
+                "
+              >
+                <div
+                  class="pt-[130%] relative overflow-hidden rounded-default radius-fix bg-gray"
+                  data-v-d87a7eae=""
+                >
+                  <div
+                    class="absolute inset-0 flex items-center justify-center"
+                    data-v-d87a7eae=""
+                  >
+                    <div class="relative w-[13.6rem] h-auto" data-v-d87a7eae="">
+                      <figure
+                        class="overflow-hidden item__fig media-fill lazy relative w-full"
+                        data-v-6567415c=""
+                        data-v-d87a7eae=""
+                      >
+                        <div
+                          style="padding-top: 134.483%"
+                          data-v-6567415c=""
+                        ></div>
+                        <!---->
+                        <picture class="absolute inset-0" data-v-6567415c=""
+                          ><source
+                            type="image/webp"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699608980-easee-charge.png?fit=max&amp;fm=webp&amp;h=3000&amp;w=2000
+                            "
+                            data-v-6567415c="" />
+                          <source
+                            type="image/jpg"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699608980-easee-charge.png?fit=max&amp;fm=jpg&amp;h=1920&amp;w=1920
+                            "
+                            data-v-6567415c="" />
+                          <img
+                            src="https://www.datocms-assets.com/105899/1699608980-easee-charge.png"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            width="522"
+                            height="702"
+                            alt=""
+                            data-v-6567415c=""
+                            class="is-loaded"
+                        /></picture>
+                      </figure>
+                    </div>
+                  </div>
+                  <div
+                    class="icon-circle absolute bottom-[20px] s:bottom-auto s:top-[30px] right-[20px] s:right-[30px] h-[55px] w-[55px] flex items-center justify-center bg-yellow rounded-full z-2"
+                    data-v-d87a7eae=""
+                  >
+                    <div
+                      class="icon-circle__icon text-[16px] pb-[.1em]"
+                      data-v-d87a7eae=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+                <h2 class="mt-[17px]" data-v-d87a7eae="">Easee Charge</h2>
+                <h3 class="text-gray-5 mt-[5px]" data-v-d87a7eae="">
+                  Up to 22kW charging speed
+                </h3>
+              </article>
+              <article
+                data-product="true"
+                class="item relative js-slide font-medium icon-circle-trig max-w-[29rem] min-w-[29rem] mr-[8px] s:mr-[17px]"
+                data-v-d87a7eae=""
+                data-v-67f0ba94=""
+                style="
+                  transform: translate(-451.44px, 0px);
+                  translate: none;
+                  rotate: none;
+                  scale: none;
+                "
+              >
+                <div
+                  class="pt-[130%] relative overflow-hidden rounded-default radius-fix bg-gray"
+                  data-v-d87a7eae=""
+                >
+                  <div
+                    class="absolute inset-0 flex items-center justify-center"
+                    data-v-d87a7eae=""
+                  >
+                    <div class="relative w-[13.6rem] h-auto" data-v-d87a7eae="">
+                      <figure
+                        class="overflow-hidden item__fig media-fill lazy relative w-full"
+                        data-v-6567415c=""
+                        data-v-d87a7eae=""
+                      >
+                        <div
+                          style="padding-top: 133.46%"
+                          data-v-6567415c=""
+                        ></div>
+                        <!---->
+                        <picture class="absolute inset-0" data-v-6567415c=""
+                          ><source
+                            type="image/webp"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1700488220-garo_pro.png?fit=max&amp;fm=webp&amp;h=3000&amp;w=2000
+                            "
+                            data-v-6567415c="" />
+                          <source
+                            type="image/jpg"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1700488220-garo_pro.png?fit=max&amp;fm=jpg&amp;h=1920&amp;w=1920
+                            "
+                            data-v-6567415c="" />
+                          <img
+                            src="https://www.datocms-assets.com/105899/1700488220-garo_pro.png"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            width="526"
+                            height="702"
+                            alt=""
+                            data-v-6567415c=""
+                            class="is-loaded"
+                        /></picture>
+                      </figure>
+                    </div>
+                  </div>
+                  <div
+                    class="icon-circle absolute bottom-[20px] s:bottom-auto s:top-[30px] right-[20px] s:right-[30px] h-[55px] w-[55px] flex items-center justify-center bg-yellow rounded-full z-2"
+                    data-v-d87a7eae=""
+                  >
+                    <div
+                      class="icon-circle__icon text-[16px] pb-[.1em]"
+                      data-v-d87a7eae=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+                <h2 class="mt-[17px]" data-v-d87a7eae="">Garo Entity Pro</h2>
+                <h3 class="text-gray-5 mt-[5px]" data-v-d87a7eae="">
+                  Up to 22kW charging speed
+                </h3>
+              </article>
+              <article
+                data-product="true"
+                class="item relative js-slide font-medium icon-circle-trig max-w-[29rem] min-w-[29rem] mr-[8px] s:mr-[17px]"
+                data-v-d87a7eae=""
+                data-v-67f0ba94=""
+                style="
+                  transform: translate(-451.44px, 0px);
+                  translate: none;
+                  rotate: none;
+                  scale: none;
+                "
+              >
+                <div
+                  class="pt-[130%] relative overflow-hidden rounded-default radius-fix bg-gray"
+                  data-v-d87a7eae=""
+                >
+                  <div
+                    class="absolute inset-0 flex items-center justify-center"
+                    data-v-d87a7eae=""
+                  >
+                    <div class="relative w-[13.6rem] h-auto" data-v-d87a7eae="">
+                      <figure
+                        class="overflow-hidden item__fig media-fill lazy relative w-full"
+                        data-v-6567415c=""
+                        data-v-d87a7eae=""
+                      >
+                        <div
+                          style="padding-top: 133.46%"
+                          data-v-6567415c=""
+                        ></div>
+                        <!---->
+                        <picture class="absolute inset-0" data-v-6567415c=""
+                          ><source
+                            type="image/webp"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609429-schneider-ev.png?fit=max&amp;fm=webp&amp;h=3000&amp;w=2000
+                            "
+                            data-v-6567415c="" />
+                          <source
+                            type="image/jpg"
+                            srcset="
+                              https://www.datocms-assets.com/105899/1699609429-schneider-ev.png?fit=max&amp;fm=jpg&amp;h=1920&amp;w=1920
+                            "
+                            data-v-6567415c="" />
+                          <img
+                            src="https://www.datocms-assets.com/105899/1699609429-schneider-ev.png"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            width="526"
+                            height="702"
+                            alt=""
+                            data-v-6567415c=""
+                            class="is-loaded"
+                        /></picture>
+                      </figure>
+                    </div>
+                  </div>
+                  <div
+                    class="icon-circle absolute bottom-[20px] s:bottom-auto s:top-[30px] right-[20px] s:right-[30px] h-[55px] w-[55px] flex items-center justify-center bg-yellow rounded-full z-2"
+                    data-v-d87a7eae=""
+                  >
+                    <div
+                      class="icon-circle__icon text-[16px] pb-[.1em]"
+                      data-v-d87a7eae=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </div>
+                <h2 class="mt-[17px]" data-v-d87a7eae="">
+                  Schneider EVlink Pro AC
+                </h2>
+                <h3 class="text-gray-5 mt-[5px]" data-v-d87a7eae="">
+                  7.2kW, 11kW and 22kW variants
+                </h3>
+              </article>
+            </div>
+            <nav
+              class="site-grid items-center pt-[50px] s:pt-[70px]"
+              data-v-67f0ba94=""
+            >
+              <div
+                class="col-span-6 s:col-span-11 relative h-[1px] bg-gray-3 overflow-hidden"
+                data-v-67f0ba94=""
+              >
+                <div
+                  class="absolute top-0 left-0 w-full h-full origin-left bg-black"
+                  data-v-67f0ba94=""
+                  id="progressBar"
+                  style="transform: scaleX(4.75824e-5)"
+                ></div>
+              </div>
+              <div
+                class="flex justify-end gap-x-[22px] max-s:!hidden col-span-2 s:col-span-1"
+                data-v-1dc50da8=""
+                data-v-67f0ba94=""
+              >
+                <button
+                  id="leftArrow"
+                  type="button"
+                  aria-label="Previous"
+                  class="carousel-btn previous relative before:absolute before:-inset-10 before:-top-[1rem] before:-bottom-[1rem] before:-right-[1rem] before:-left-[1rem]"
+                  data-v-1dc50da8=""
+                >
+                  <div
+                    class="relative overflow-hidden relative p2"
+                    data-v-1dc50da8=""
+                  >
+                    <div
+                      class="carousel-btn__icon --first relative"
+                      data-v-1dc50da8=""
+                    >
+                      ←
+                    </div>
+                    <div
+                      class="carousel-btn__icon --last absolute top-0 left-0"
+                      data-v-1dc50da8=""
+                    >
+                      ←
+                    </div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  id="rightArrow"
+                  aria-label="Previous"
+                  class="carousel-btn next relative before:absolute before:-inset-10 before:-top-[1rem] before:-bottom-[1rem] before:-right-[1rem] before:-left-[1rem]"
+                  data-v-1dc50da8=""
+                >
+                  <div
+                    class="relative overflow-hidden relative p2"
+                    data-v-1dc50da8=""
+                  >
+                    <div
+                      class="carousel-btn__icon --first relative"
+                      data-v-1dc50da8=""
+                    >
+                      →
+                    </div>
+                    <div
+                      class="carousel-btn__icon --last absolute top-0 left-0"
+                      data-v-1dc50da8=""
+                    >
+                      →
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </nav>
+          </div>
+        </div>
+        <!---->
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+
+    <script>
+      var el = document.getElementById("swipeElement");
+      var items = document.querySelectorAll(".item");
+      var rightArrow = document.getElementById("rightArrow");
+      var leftArrow = document.getElementById("leftArrow");
+
+      let initialTransformX = 0;
+      let containerWidth = el.offsetWidth;
+      let totalItemsWidth = getTotalItemsWidth();
+
+      var mc = new Hammer(el);
+
+      mc.get("pan").set({
+        threshold: 100,
+        velocity: 0.9,
+        direction: Hammer.DIRECTION_HORIZONTAL,
+      });
+
+      mc.on("pan", function (ev) {
+        moveSlider(ev.deltaX);
+      });
+
+      mc.on("panend", function (ev) {
+        initialTransformX = initialTransformX + ev.deltaX;
+      });
+
+      rightArrow.addEventListener("click", handleRightArrowClick);
+      leftArrow.addEventListener("click", handleLeftArrowClick);
+
+      function moveSlider(deltaX) {
+        console.log("deltaX", deltaX);
+        updateProgressBar(deltaX);
+
+        console.log("initialTransformX", initialTransformX);
+        let newTransformX = initialTransformX + deltaX;
+        console.log("newTransformX", newTransformX);
+
+        if (newTransformX > 0) {
+          newTransformX = 0;
+        }
+        let leftLimit = containerWidth - (totalItemsWidth + 120);
+        if (newTransformX < leftLimit) {
+          newTransformX = leftLimit;
+        }
+
+        items.forEach((item) => {
+          item.style.transition = "transform 0.3s ease";
+          item.style.transform = `translate(${newTransformX}px, 0px)`;
+        });
+      }
+
+      function getTotalItemsWidth() {
+        let totalWidth = 0;
+        items.forEach((item) => {
+          totalWidth += item.offsetWidth;
+        });
+        return totalWidth;
+      }
+
+      function handleRightArrowClick() {
+        initialTransformX = initialTransformX - (items[0].offsetWidth + 12);
+
+        moveSlider(0);
+      }
+
+      function handleLeftArrowClick() {
+        initialTransformX = initialTransformX + (items[0].offsetWidth + 12);
+
+        moveSlider(0);
+      }
+
+      function updateProgressBar(deltaX) {
+        var newTransformX = initialTransformX + deltaX;
+        var ratio = -newTransformX / (totalItemsWidth - containerWidth);
+
+        ratio = Math.max(0, Math.min(1, ratio));
+
+        var progressBar = document.getElementById("progressBar");
+        progressBar.style.transform = `scaleX(${ratio})`;
+      }
+    </script>
+  </body>
+</html>
